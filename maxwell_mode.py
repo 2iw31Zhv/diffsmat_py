@@ -27,19 +27,20 @@ class MaxwellMode:
         self.meshkx, self.meshky = torch.meshgrid(kx, ky, indexing = "xy")
         self.meshkx = self.meshkx.flatten()
         self.meshky = self.meshky.flatten()
+
         self.vals = self.k0**2 * (self.k0**2 - self.meshkx**2 - self.meshky**2)
         self.vals = torch.cat((self.vals, self.vals))
         self.vecs = torch.eye(self.ndim, dtype = torch.complex128, device = device)
         self.left_vecs = torch.eye(self.ndim, dtype = torch.complex128, device = device)
         self.__eigval_sqrt(self.vals)
 
-        Q00 =  - torch.diag(self.meshkx * self.meshky)
-        Q01 = torch.diag(self.meshkx**2) - self.k0**2
-        Q10 = - torch.diag(self.meshky**2) + self.k0**2
-        Q11 = torch.diag(self.meshky * self.meshkx)
+        Q00 = - torch.diag(self.meshky**2) + self.k0**2
+        Q01 = torch.diag(self.meshky * self.meshkx)
+        Q10 =  - torch.diag(self.meshkx * self.meshky)
+        Q11 = torch.diag(self.meshkx**2) - self.k0**2
         matrix_q = torch.cat((torch.cat((Q00, Q01), dim = 1), torch.cat((Q10, Q11), dim = 1)), dim = 0)
+        # the calculation of dual_vecs is not correct
         self.dual_vecs = matrix_q / self.valsqrt
-
 
     def compute(self, coeff=None, device = "cpu"):
         self.k0 = coeff.k0
@@ -78,9 +79,9 @@ class MaxwellMode:
         ky = 2 * np.pi / Ly * ns
         xs = torch.linspace(0, Lx, nx_grid, device = field_in_fourier.device, dtype = torch.float64)
         ys = torch.linspace(0, Ly, ny_grid, device = field_in_fourier.device, dtype = torch.float64) 
-        basis_kx = torch.exp(1j * kx[None, :] * xs[:, None])
-        basis_ky = torch.exp(1j * ky[:, None] * ys[None, :])
-        return basis_kx @ field_in_fourier @ basis_ky
+        basis_kx = torch.exp(1j * kx[:, None] * xs[None, :])
+        basis_ky = torch.exp(1j * ky[None, :] * ys[:, None])
+        return basis_ky @ field_in_fourier @ basis_kx
     
     def Ex(self, k, nx_grid = 100, ny_grid = 100, Lx = 1, Ly = 1):
         Ex_fourier = self.Ex_fourier(k)

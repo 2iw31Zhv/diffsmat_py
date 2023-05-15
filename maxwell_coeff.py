@@ -50,19 +50,19 @@ class MaxwellCoeff:
         F1h = torch.linalg.solve(self.fe, torch.diag(self.meshkx))
         F2h = torch.linalg.solve(self.fe, torch.diag(self.meshky))
  
-        P00 = torch.diag(self.meshkx) @ F2h
-        P01 = - torch.diag(self.meshkx) @ F1h
-        P01.diagonal().add_(k02)
-        P10 = torch.diag(self.meshky) @ F2h
-        P10.diagonal().add_(-k02)
-        P11 = - torch.diag(self.meshky) @ F1h
+        P00 = - torch.diag(self.meshkx) @ F1h
+        P00.diagonal().add_(k02)
+        P01 = torch.diag(self.meshkx) @ F2h
+        P10 = - torch.diag(self.meshky) @ F1h
+        P11 = torch.diag(self.meshky) @ F2h
+        P11.diagonal().add_(-k02)
 
         self.P = torch.cat((torch.cat((P00, P01), dim = 1), torch.cat((P10, P11), dim = 1)), dim = 0)
 
-        Q00 =  - torch.diag(self.meshkx * self.meshky)
-        Q01 = torch.diag(self.meshkx**2) - k02 * self.fe 
-        Q10 = - torch.diag(self.meshky**2) + k02 * self.fe
-        Q11 = torch.diag(self.meshky * self.meshkx)
+        Q00 = - torch.diag(self.meshky**2) + k02 * self.fe
+        Q01 = torch.diag(self.meshky * self.meshkx)
+        Q10 =  - torch.diag(self.meshkx * self.meshky)
+        Q11 = torch.diag(self.meshkx**2) - k02 * self.fe 
 
         self.Q = torch.cat((torch.cat((Q00, Q01), dim = 1), torch.cat((Q10, Q11), dim = 1)), dim = 0)
 

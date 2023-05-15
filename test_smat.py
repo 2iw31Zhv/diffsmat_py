@@ -13,9 +13,10 @@ if device == "cuda":
 else:
     print("Using CPU")
 
-nx = ny = 3 # half of the harmonics along x and y directions
+nx = 10 # half of the harmonics along x and y directions
+ny = 12
 nx_grid = 4 # grid number along x direction, we use analytical Fourier transform, so nx_grid can be very small
-n_opt = 2 # number of optimization grid along one direction
+n_opt = 0 # number of optimization grid along one direction
 wavelength = 1.55
 Lx = 1. # period
 Ly = 1. # period
@@ -33,31 +34,33 @@ ex = eps_out * torch.ones(nx_grid, ny_grid, device = device, dtype = torch.float
 ex[nx_grid//2 - n_opt//2 : nx_grid//2 + n_opt//2, ny_grid//2 - n_opt//2 : ny_grid//2 + n_opt//2] += (eps_in - eps_out) * de
 
 coeff = MaxwellCoeff(nx, ny, Lx, Ly, device = device)
-# coeff.compute(wavelength, ex, device = device)
 port_mode = MaxwellMode()
 port_mode.compute_in_vacuum(wavelength, coeff.kx, coeff.ky, device = device)
-# port_mode.compute(coeff, device = device)
+
 neff_port = port_mode.valsqrt.real / k0 / k0
 neff_port, port_indices = torch.sort(neff_port, descending = True)
-print(neff_port[:n_mode])
+
+print(port_mode.valsqrt[port_indices[:2]] / k0 / k0)
 
 plt.subplots(2, 4, figsize = (10, 5))
 for i in range(2):
     plt.subplot(2, 4, i*4+1)
-    plt.imshow(port_mode.Ex(port_indices[i]).detach().cpu().numpy().real)
+    plt.imshow(port_mode.Ex_fourier(port_indices[i]).detach().cpu().numpy().real)
+    plt.clim(-1, 1)
     plt.subplot(2, 4, i*4+2)
-    plt.imshow(port_mode.Ey(port_indices[i]).detach().cpu().numpy().real)
+    plt.imshow(port_mode.Ey_fourier(port_indices[i]).detach().cpu().numpy().real)
+    plt.clim(-1, 1)
     plt.subplot(2, 4, i*4+3)
-    plt.imshow(port_mode.Hx(port_indices[i]).detach().cpu().numpy().real)
+    plt.imshow(port_mode.Hx_fourier(port_indices[i]).detach().cpu().numpy().real)
+    plt.clim(-1, 1)
     plt.subplot(2, 4, i*4+4)
-    plt.imshow(port_mode.Hy(port_indices[i]).detach().cpu().numpy().real)
+    plt.imshow(port_mode.Hy_fourier(port_indices[i]).detach().cpu().numpy().real)
+    plt.clim(-1, 1)
 plt.savefig("all_modes_port.png")
 plt.close()
 
-
 plt.imshow(ex.detach().cpu().numpy().real)
 plt.savefig("ex.png")
-
 coeff.compute(wavelength, ex, device = device)
 
 mode = MaxwellMode()
@@ -66,16 +69,20 @@ neff = mode.valsqrt.real / k0 / k0
 neff, indices = torch.sort(neff, descending = True)
 print(neff[:n_mode])
 
-plt.subplots(n_mode, 4, figsize = (10, 15))
+plt.subplots(n_mode, 4, figsize = (10, 5))
 for i in range(n_mode):
     plt.subplot(n_mode, 4, i*4+1)
-    plt.imshow(mode.Ex(indices[i]).detach().cpu().numpy().real)
+    plt.imshow(mode.Ex_fourier(indices[i]).detach().cpu().numpy().real)
+    plt.clim(-1, 1)
     plt.subplot(n_mode, 4, i*4+2)
-    plt.imshow(mode.Ey(indices[i]).detach().cpu().numpy().real)
+    plt.imshow(mode.Ey_fourier(indices[i]).detach().cpu().numpy().real)
+    plt.clim(-1, 1)
     plt.subplot(n_mode, 4, i*4+3)
-    plt.imshow(mode.Hx(indices[i]).detach().cpu().numpy().real)
+    plt.imshow(mode.Hx_fourier(indices[i]).detach().cpu().numpy().real)
+    plt.clim(-1, 1)
     plt.subplot(n_mode, 4, i*4+4)
-    plt.imshow(mode.Hy(indices[i]).detach().cpu().numpy().real)
+    plt.imshow(mode.Hy_fourier(indices[i]).detach().cpu().numpy().real)
+    plt.clim(-1, 1)
 
 plt.savefig("all_modes.png")
 plt.close()
