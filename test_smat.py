@@ -13,8 +13,9 @@ if device == "cuda":
 else:
     print("Using CPU")
 
+# not correct when nx != ny
 nx = 10 # half of the harmonics along x and y directions
-ny = 12
+ny = 10
 nx_grid = 4 # grid number along x direction, we use analytical Fourier transform, so nx_grid can be very small
 n_opt = 0 # number of optimization grid along one direction
 wavelength = 1.55
@@ -45,16 +46,16 @@ print(port_mode.valsqrt[port_indices[:2]] / k0 / k0)
 plt.subplots(2, 4, figsize = (10, 5))
 for i in range(2):
     plt.subplot(2, 4, i*4+1)
-    plt.imshow(port_mode.Ex_fourier(port_indices[i]).detach().cpu().numpy().real)
+    plt.imshow(port_mode.Ex(port_indices[i]).detach().cpu().numpy().real)
     plt.clim(-1, 1)
     plt.subplot(2, 4, i*4+2)
-    plt.imshow(port_mode.Ey_fourier(port_indices[i]).detach().cpu().numpy().real)
+    plt.imshow(port_mode.Ey(port_indices[i]).detach().cpu().numpy().real)
     plt.clim(-1, 1)
     plt.subplot(2, 4, i*4+3)
-    plt.imshow(port_mode.Hx_fourier(port_indices[i]).detach().cpu().numpy().real)
+    plt.imshow(port_mode.Hx(port_indices[i]).detach().cpu().numpy().real)
     plt.clim(-1, 1)
     plt.subplot(2, 4, i*4+4)
-    plt.imshow(port_mode.Hy_fourier(port_indices[i]).detach().cpu().numpy().real)
+    plt.imshow(port_mode.Hy(port_indices[i]).detach().cpu().numpy().real)
     plt.clim(-1, 1)
 plt.savefig("all_modes_port.png")
 plt.close()
@@ -72,16 +73,16 @@ print(neff[:n_mode])
 plt.subplots(n_mode, 4, figsize = (10, 5))
 for i in range(n_mode):
     plt.subplot(n_mode, 4, i*4+1)
-    plt.imshow(mode.Ex_fourier(indices[i]).detach().cpu().numpy().real)
+    plt.imshow(mode.Ex(indices[i]).detach().cpu().numpy().real)
     plt.clim(-1, 1)
     plt.subplot(n_mode, 4, i*4+2)
-    plt.imshow(mode.Ey_fourier(indices[i]).detach().cpu().numpy().real)
+    plt.imshow(mode.Ey(indices[i]).detach().cpu().numpy().real)
     plt.clim(-1, 1)
     plt.subplot(n_mode, 4, i*4+3)
-    plt.imshow(mode.Hx_fourier(indices[i]).detach().cpu().numpy().real)
+    plt.imshow(mode.Hx(indices[i]).detach().cpu().numpy().real)
     plt.clim(-1, 1)
     plt.subplot(n_mode, 4, i*4+4)
-    plt.imshow(mode.Hy_fourier(indices[i]).detach().cpu().numpy().real)
+    plt.imshow(mode.Hy(indices[i]).detach().cpu().numpy().real)
     plt.clim(-1, 1)
 
 plt.savefig("all_modes.png")

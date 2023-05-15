@@ -34,10 +34,12 @@ class MaxwellMode:
         self.left_vecs = torch.eye(self.ndim, dtype = torch.complex128, device = device)
         self.__eigval_sqrt(self.vals)
 
-        Q00 = - torch.diag(self.meshky**2) + self.k0**2
+        Q00 = - torch.diag(self.meshky**2)
+        Q00.diagonal().add_(self.k0**2)
         Q01 = torch.diag(self.meshky * self.meshkx)
         Q10 =  - torch.diag(self.meshkx * self.meshky)
-        Q11 = torch.diag(self.meshkx**2) - self.k0**2
+        Q11 = torch.diag(self.meshkx**2)
+        Q11.diagonal().add_(-self.k0**2)
         matrix_q = torch.cat((torch.cat((Q00, Q01), dim = 1), torch.cat((Q10, Q11), dim = 1)), dim = 0)
         # the calculation of dual_vecs is not correct
         self.dual_vecs = matrix_q / self.valsqrt
@@ -59,16 +61,16 @@ class MaxwellMode:
         self.__evaluate_H(coeff.Q, self.valsqrt, self.vecs)
 
     def Ex_fourier(self, k):
-        return self.vecs[:self.half_dim, k].reshape((self.ny, self.nx))
+        return self.vecs[:self.half_dim, k].reshape((self.nx, self.ny)).T
     
     def Ey_fourier(self, k):
-        return self.vecs[self.half_dim:None, k].reshape((self.ny, self.nx))
+        return self.vecs[self.half_dim:None, k].reshape((self.nx, self.ny)).T
 
     def Hx_fourier(self, k):
-        return self.dual_vecs[self.half_dim:None, k].reshape((self.ny, self.nx))
+        return self.dual_vecs[self.half_dim:None, k].reshape((self.nx, self.ny)).T
        
     def Hy_fourier(self, k):
-        return self.dual_vecs[:self.half_dim, k].reshape((self.ny, self.nx))
+        return self.dual_vecs[:self.half_dim, k].reshape((self.nx, self.ny)).T
     
     def field_in_real(self, field_in_fourier, nx_grid, ny_grid, Lx, Ly):
         M = (self.nx - 1) // 2
