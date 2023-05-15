@@ -14,8 +14,8 @@ else:
     print("Using CPU")
 
 # not correct when nx != ny
-nx = 10 # half of the harmonics along x and y directions
-ny = 10
+nx = 3 # half of the harmonics along x and y directions
+ny = 3
 nx_grid = 4 # grid number along x direction, we use analytical Fourier transform, so nx_grid can be very small
 n_opt = 0 # number of optimization grid along one direction
 wavelength = 1.55
@@ -92,7 +92,7 @@ smat = ScatteringMatrix()
 smat.compute(mode, 1.)
 smat.port_project(port_mode, coeff)
 smatsqr = torch.abs(smat.smat)**2
-plt.imshow(smatsqr[torch.diag(port_indices[:n_mode]), torch.diag(port_indices[:n_mode])].detach().cpu().numpy())
+plt.imshow(smatsqr.detach().cpu().numpy())
 plt.colorbar()
 plt.savefig("smat.png")
 plt.close()
