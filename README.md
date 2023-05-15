@@ -5,3 +5,10 @@ Ziwei Zhu, and Changxi Zheng. [Differentiable Scattering Matrix for Optimization
 
 
 C++ version [link](https://github.com/Columbia-Computational-X-Lab/DiffSMat)
+
+## Feature Request
+This is a pre-release version of the RCWA part of our unified python library MaxPy. We are working to improve it. Feel free to submit a feature request through the following two ways:
+
+1. open an issue on GitHub.
+2. email ziweizhu95@gmail.com for any feedbacks or requests.
+
