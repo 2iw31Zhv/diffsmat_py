@@ -12,7 +12,6 @@ class MaxwellCoeff:
 
         self.kx = 2. * np.pi / Lx * torch.arange(-nx, nx + 1, requires_grad = False, device = device)
         self.ky = 2. * np.pi / Ly * torch.arange(-ny, ny + 1, requires_grad = False, device = device)
-
         self.kx = self.kx.type(torch.complex128)
         self.ky = self.ky.type(torch.complex128)
         self.meshkx, self.meshky = torch.meshgrid(self.kx, self.ky, indexing = "xy")
@@ -26,8 +25,14 @@ class MaxwellCoeff:
         self.ndim = 2 * self.half_dim
 
         if pml_thickness > 0.:
-            raise Exception("Sorry, PML for RCWA is not implemented yet.")
-        
+            raise Exception("Sorry, PML for RCWA is not implemented yet, please refer to our Cpp Library VarRCWA.")
+    
+    def kx(self):
+        return self.kx
+    
+    def ky(self):
+        return self.ky
+    
     def matrix_pq(self):
         return self.PQ
 
@@ -35,10 +40,10 @@ class MaxwellCoeff:
         if kappa != 0.:
             raise Exception("Sorry, curvilinear space for RCWA is not implemented yet.")
         if ey != None or inv_exy != None:
-            raise Exception("No fast fourier transform for RCWA is implemented yet.")
+            raise Exception("No fast fourier transform for RCWA is implemented yet, please refer to our Cpp library DiffSMat.")
         
-        k0 = 2. * np.pi / wavelength
-        k02 = k0 ** 2
+        self.k0 = 2. * np.pi / wavelength
+        k02 = self.k0 ** 2
         self.fe2D = analytical_fourier_2d(ex, self.Lx, self.Ly, self.nx_harmonics, self.ny_harmonics, device = device)
         self.fe = BlockToeplitz2D(self.fe2D).to_dense() # (nx_harmonics * ny_harmonics) x (nx_harmonics * ny_harmonics)
         

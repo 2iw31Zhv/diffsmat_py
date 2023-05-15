@@ -29,12 +29,14 @@ def analytical_fourier_2d(e, Lx, Ly, M, N, device = "cpu"):
     nx, ny = e.shape
     dx = Lx / nx
     dy = Ly / ny
-    kx = torch.arange(-M+1, M, device = device) * 2 * np.pi / Lx
-    ky = torch.arange(-N+1, N, device = device) * 2 * np.pi / Ly
-    xs = torch.linspace(0., Lx, nx, requires_grad=False, device=e.device)
-    ys = torch.linspace(0., Ly, ny, requires_grad=False, device=e.device)
-    basis_kx_conj = torch.exp(-1j * kx[:, None] * xs[None, :])
-    basis_ky_conj = torch.exp(-1j * ky[:, None] * ys[None, :])
+    ms = torch.arange(-M+1, M, device = device)
+    ns = torch.arange(-N+1, N, device = device)
+    kx = 2 * np.pi / Lx * ms
+    ky = 2 * np.pi / Ly * ns
+    xs = torch.linspace(0.5*dx, Lx-0.5*dx, nx, requires_grad=False, device=e.device)
+    ys = torch.linspace(0.5*dy, Ly-0.5*dy, ny, requires_grad=False, device=e.device)
+    basis_kx_conj = torch.exp(-1j * kx[:, None] * xs[None, :]) * torch.special.sinc(ms * dx / Lx)[:, None]
+    basis_ky_conj = torch.exp(-1j * ky[:, None] * ys[None, :]) * torch.special.sinc(ns * dy / Ly)[:, None]
     fe2D = torch.sum(basis_kx_conj[:, :, None, None] * basis_ky_conj[None, None, :, :] * e[None, :, None, :] * dx * dy, dim = (1, 3))
     return fe2D / (Lx * Ly)
     
