@@ -14,8 +14,8 @@ else:
     print("Using CPU")
 
 # not correct when nx != ny
-nx = 3 # half of the harmonics along x and y directions
-ny = 3
+nx = 10 # half of the harmonics along x and y directions
+ny = 12
 nx_grid = 4 # grid number along x direction, we use analytical Fourier transform, so nx_grid can be very small
 n_opt = 0 # number of optimization grid along one direction
 wavelength = 1.55

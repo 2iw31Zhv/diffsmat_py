@@ -6,6 +6,7 @@ from maxwell_coeff import *
 from maxwell_mode import *
 from scattering_matrix import *
 import matplotlib.pyplot as plt
+import time
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 if device == "cuda":
@@ -13,9 +14,8 @@ if device == "cuda":
 else:
     print("Using CPU")
 
-
-nx = ny = 3 # half of the harmonics along x and y directions
-nx_grid = 4 # grid number along x direction, we use analytical Fourier transform, so nx_grid can be very small
+nx = ny = 9 # half of the harmonics along x and y directions
+nx_grid = 512 # grid number along x direction, we use analytical Fourier transform, so nx_grid can be very small
 n_opt = 2 # number of optimization grid along one direction
 wavelength = 1.55
 Lx = 1. # period
@@ -44,13 +44,13 @@ def compute_loss(de):
     smat = ScatteringMatrix()
     smat.compute(mode, 1.)
     smat.port_project(port_mode, coeff)
-    smatsqr = torch.abs(smat.smat)**2
+    smatsqr = torch.abssmat.smat)**2
     smatsqr = smatsqr[port_indices[:n_mode], port_indices[:n_mode]]
     return -torch.sum(torch.diag(smatsqr))
 
 # check if the gradient is correct
 print(torch.autograd.gradcheck(compute_loss, (de)))
-
+t1 = time.perf_counter()
 loss_history = []
 niters = 10
 optimizer = optim.Adam([de], lr=1e-3)
@@ -63,6 +63,8 @@ for i in range(niters):
     de.data = torch.clamp(de.data, 0., 1.)
     # t5 = time.perf_counter()
     print("i, de, loss = ", i, de.flatten().detach().cpu().numpy(), loss.item())
+t2 = time.perf_counter()
+print("time = ", t2 - t1)
 
 plt.plot(loss_history)
 plt.savefig("loss_history.png")
