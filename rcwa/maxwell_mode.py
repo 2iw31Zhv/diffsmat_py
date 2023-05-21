@@ -17,14 +17,15 @@ class MaxwellMode:
     def __evaluate_H(self, matrix_q, valsqrt, vecs):
         self.dual_vecs = (matrix_q @ vecs) / valsqrt
     
-    def compute_in_vacuum(self, wavelength, kx, ky, device = "cpu"):
+    def compute_in_vacuum(self, wavelength, coeff, device = "cpu"):
         '''
         compute the eigenmodes in vacuum
 
         wavelength: wavelength of the incident light
-        kx: x component of the wave vector
-        ky: y component of the wave vector
+        coeff: MaxwellCoeff object, it does not need to call compute() method
         '''
+        kx = coeff.kx
+        ky = coeff.ky
         self.k0 = 2 * np.pi / wavelength
         self.nx = kx.shape[0]
         self.ny = ky.shape[0]
@@ -54,7 +55,7 @@ class MaxwellMode:
         '''
         compute the eigenmodes in a distribution specified by coeff
 
-        coeff: MaxwellCoeff object
+        coeff: MaxwellCoeff object, it need to call compute() method first
         '''
         self.k0 = coeff.k0
         self.half_dim = coeff.half_dim

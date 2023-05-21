@@ -16,6 +16,7 @@ else:
     print("Using CPU")
 
 nx = ny = 4 # half of the harmonics along x and y directions
+# number of harmonics is (2 * nx + 1) x (2 * ny + 1)
 nx_grid = 4 # grid number along x direction, we use analytical Fourier transform, so nx_grid can be very small
 n_opt = 2 # number of optimization grid along one direction
 wavelength = 1.55
@@ -36,7 +37,7 @@ def compute_loss(de):
     ex[nx_grid//2 - n_opt//2 : nx_grid//2 + n_opt//2, ny_grid//2 - n_opt//2 : ny_grid//2 + n_opt//2] += (eps_in - eps_out) * de
     coeff = MaxwellCoeff(nx, ny, Lx, Ly, device = device)
     port_mode = MaxwellMode()
-    port_mode.compute_in_vacuum(wavelength, coeff.kx, coeff.ky, device = device)
+    port_mode.compute_in_vacuum(wavelength, coeff, device = device)
     neff_port = port_mode.valsqrt.real / k0 / k0
     neff_port, port_indices = torch.sort(neff_port, descending = True)
     coeff.compute(wavelength, ex, device = device)
@@ -48,9 +49,6 @@ def compute_loss(de):
     smatsqr = torch.abs(smat.smat)**2
     smatsqr = smatsqr[port_indices[:n_mode], port_indices[:n_mode]]
     return -torch.sum(torch.diag(smatsqr))
-
-# check if the gradient is correct
-print(torch.autograd.gradcheck(compute_loss, (de)))
 
 loss_history = []
 niters = 10

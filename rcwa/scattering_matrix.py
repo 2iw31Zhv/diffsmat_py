@@ -1,5 +1,5 @@
 import torch
-from rcwa.diff_matfunc import sqrtm_ops_core
+from .diff_matfunc import sqrtm_ops_core
 
 class ScatteringMatrix:
     def __init__(self):

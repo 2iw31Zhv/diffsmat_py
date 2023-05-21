@@ -36,7 +36,7 @@ ex[nx_grid//2 - n_opt//2 : nx_grid//2 + n_opt//2, ny_grid//2 - n_opt//2 : ny_gri
 
 coeff = MaxwellCoeff(nx, ny, Lx, Ly, device = device)
 port_mode = MaxwellMode()
-port_mode.compute_in_vacuum(wavelength, coeff.kx, coeff.ky, device = device)
+port_mode.compute_in_vacuum(wavelength, coeff, device = device)
 
 neff_port = port_mode.valsqrt.real / k0 / k0
 neff_port, port_indices = torch.sort(neff_port, descending = True)

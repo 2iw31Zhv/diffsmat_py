@@ -1,7 +1,7 @@
 import numpy as np
 import torch
-from rcwa.blocktoeplitz_2d import BlockToeplitz2D
-from rcwa.fourier_2d import analytical_fourier_2d
+from .blocktoeplitz_2d import BlockToeplitz2D
+from .fourier_2d import analytical_fourier_2d
 
 class MaxwellCoeff:
     '''
