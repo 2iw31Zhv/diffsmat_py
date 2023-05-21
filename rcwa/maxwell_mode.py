@@ -18,6 +18,13 @@ class MaxwellMode:
         self.dual_vecs = (matrix_q @ vecs) / valsqrt
     
     def compute_in_vacuum(self, wavelength, kx, ky, device = "cpu"):
+        '''
+        compute the eigenmodes in vacuum
+
+        wavelength: wavelength of the incident light
+        kx: x component of the wave vector
+        ky: y component of the wave vector
+        '''
         self.k0 = 2 * np.pi / wavelength
         self.nx = kx.shape[0]
         self.ny = ky.shape[0]
@@ -41,10 +48,14 @@ class MaxwellMode:
         Q11 = torch.diag(self.meshkx**2)
         Q11.diagonal().add_(-self.k0**2)
         matrix_q = torch.cat((torch.cat((Q00, Q01), dim = 1), torch.cat((Q10, Q11), dim = 1)), dim = 0)
-        # the calculation of dual_vecs is not correct
         self.dual_vecs = matrix_q / self.valsqrt
 
-    def compute(self, coeff=None, device = "cpu"):
+    def compute(self, coeff, device = "cpu"):
+        '''
+        compute the eigenmodes in a distribution specified by coeff
+
+        coeff: MaxwellCoeff object
+        '''
         self.k0 = coeff.k0
         self.half_dim = coeff.half_dim
         self.ndim = coeff.ndim
@@ -61,16 +72,16 @@ class MaxwellMode:
         self.__evaluate_H(coeff.Q, self.valsqrt, self.vecs)
 
     def Ex_fourier(self, k):
-        return self.vecs[:self.half_dim, k].reshape((self.nx, self.ny)).T
+        return self.vecs[:self.half_dim, k].reshape((self.ny, self.nx))
     
     def Ey_fourier(self, k):
-        return self.vecs[self.half_dim:None, k].reshape((self.nx, self.ny)).T
+        return self.vecs[self.half_dim:None, k].reshape((self.ny, self.nx))
 
     def Hx_fourier(self, k):
-        return self.dual_vecs[self.half_dim:None, k].reshape((self.nx, self.ny)).T
+        return self.dual_vecs[self.half_dim:None, k].reshape((self.ny, self.nx))
        
     def Hy_fourier(self, k):
-        return self.dual_vecs[:self.half_dim, k].reshape((self.nx, self.ny)).T
+        return self.dual_vecs[:self.half_dim, k].reshape((self.ny, self.nx))
     
     def field_in_real(self, field_in_fourier, nx_grid, ny_grid, Lx, Ly):
         M = (self.nx - 1) // 2

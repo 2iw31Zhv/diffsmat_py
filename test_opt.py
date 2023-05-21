@@ -2,11 +2,12 @@ import numpy as np
 import torch
 import torch.optim as optim
 import matplotlib.pyplot as plt
-from maxwell_coeff import *
-from maxwell_mode import *
-from scattering_matrix import *
+from rcwa.maxwell_coeff import *
+from rcwa.maxwell_mode import *
+from rcwa.scattering_matrix import *
 import matplotlib.pyplot as plt
 import time
+from torch.profiler import profile, record_function, ProfilerActivity
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 if device == "cuda":
@@ -14,8 +15,8 @@ if device == "cuda":
 else:
     print("Using CPU")
 
-nx = ny = 9 # half of the harmonics along x and y directions
-nx_grid = 512 # grid number along x direction, we use analytical Fourier transform, so nx_grid can be very small
+nx = ny = 4 # half of the harmonics along x and y directions
+nx_grid = 4 # grid number along x direction, we use analytical Fourier transform, so nx_grid can be very small
 n_opt = 2 # number of optimization grid along one direction
 wavelength = 1.55
 Lx = 1. # period
@@ -44,16 +45,22 @@ def compute_loss(de):
     smat = ScatteringMatrix()
     smat.compute(mode, 1.)
     smat.port_project(port_mode, coeff)
-    smatsqr = torch.abssmat.smat)**2
+    smatsqr = torch.abs(smat.smat)**2
     smatsqr = smatsqr[port_indices[:n_mode], port_indices[:n_mode]]
     return -torch.sum(torch.diag(smatsqr))
 
 # check if the gradient is correct
 print(torch.autograd.gradcheck(compute_loss, (de)))
-t1 = time.perf_counter()
+
 loss_history = []
 niters = 10
 optimizer = optim.Adam([de], lr=1e-3)
+# with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
+#              with_stack=True,
+#              profile_memory=True,
+#              record_shapes=True,
+#              with_modules = True) as prof:
+t1 = time.perf_counter()
 for i in range(niters):
     optimizer.zero_grad()
     loss = compute_loss(de)
@@ -65,6 +72,7 @@ for i in range(niters):
     print("i, de, loss = ", i, de.flatten().detach().cpu().numpy(), loss.item())
 t2 = time.perf_counter()
 print("time = ", t2 - t1)
+# print(prof.key_averages(group_by_input_shape = True).table(sort_by = "self_cpu_time_total", row_limit=20))
 
 plt.plot(loss_history)
 plt.savefig("loss_history.png")

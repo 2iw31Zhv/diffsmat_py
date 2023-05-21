@@ -1,14 +1,24 @@
 import numpy as np
 import torch
-from blocktoeplitz_2d import BlockToeplitz2D
-from fourier_2d import analytical_fourier_2d
+from rcwa.blocktoeplitz_2d import BlockToeplitz2D
+from rcwa.fourier_2d import analytical_fourier_2d
 
 class MaxwellCoeff:
+    '''
+    This class is used to compute the Maxwell coefficient matrix for RCWA.
+    '''
     def __init__(self, nx, ny, Lx, Ly, pml_thickness = 0., device = "cpu"):
-        self.nx = nx # half of harmonics along the x axis
-        self.ny = ny # half of harmonics along the y axis
-        self.Lx = Lx # periodicity along the x axis
-        self.Ly = Ly # periodicity along the y axis
+        '''
+        nx: half of the harmonics along x direction
+        ny: half of the harmonics along y direction
+        Lx: period along x direction
+        Ly: period along y direction
+        pml_thickness: thickness of the pml layer
+        '''
+        self.nx = nx
+        self.ny = ny
+        self.Lx = Lx
+        self.Ly = Ly
 
         self.kx = 2. * np.pi / Lx * torch.arange(-nx, nx + 1, requires_grad = False, device = device)
         self.ky = 2. * np.pi / Ly * torch.arange(-ny, ny + 1, requires_grad = False, device = device)
@@ -17,7 +27,7 @@ class MaxwellCoeff:
         self.meshkx, self.meshky = torch.meshgrid(self.kx, self.ky, indexing = "xy")
         self.meshkx = self.meshkx.flatten()
         self.meshky = self.meshky.flatten()
-
+    
         self.nx_harmonics = 2 * nx + 1
         self.ny_harmonics = 2 * ny + 1
         
@@ -36,10 +46,17 @@ class MaxwellCoeff:
     def matrix_pq(self):
         return self.PQ
 
-    def compute(self, wavelength, ex, ey=None, inv_exy=None, kappa = 0., device = "cpu"):
+    def compute(self, wavelength, ex, ey=None, inv_ez=None, kappa = 0., device = "cpu"):
+        '''
+        wavelength: wavelength of the incident light
+        ex: permittivity along x direction
+        ey: permittivity along y direction
+        inv_ez: inverse of the permittivity along z direction
+        kappa: curvature of the domain center
+        '''
         if kappa != 0.:
             raise Exception("Sorry, curvilinear space for RCWA is not implemented yet.")
-        if ey != None or inv_exy != None:
+        if ey != None or inv_ez != None:
             raise Exception("No fast fourier transform for RCWA is implemented yet, please refer to our Cpp library DiffSMat.")
         
         self.k0 = 2. * np.pi / wavelength

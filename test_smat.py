@@ -2,9 +2,9 @@ import numpy as np
 import torch
 import torch.optim as optim
 import matplotlib.pyplot as plt
-from maxwell_coeff import *
-from maxwell_mode import *
-from scattering_matrix import *
+from rcwa.maxwell_coeff import *
+from rcwa.maxwell_mode import *
+from rcwa.scattering_matrix import *
 import matplotlib.pyplot as plt
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -14,8 +14,8 @@ else:
     print("Using CPU")
 
 # not correct when nx != ny
-nx = 10 # half of the harmonics along x and y directions
-ny = 12
+nx = 3 # half of the harmonics along x and y directions
+ny = 3
 nx_grid = 4 # grid number along x direction, we use analytical Fourier transform, so nx_grid can be very small
 n_opt = 0 # number of optimization grid along one direction
 wavelength = 1.55
