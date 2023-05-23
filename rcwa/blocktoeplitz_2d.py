@@ -15,10 +15,10 @@ class BlockToeplitz2D:
         rows = torch.arange(self.nx * self.ny, dtype = torch.int64, device = self.device)
         cols = torch.arange(self.nx * self.ny, dtype = torch.int64, device = self.device)
         rows, cols = torch.meshgrid(rows, cols, indexing = "ij")
-        ms = torch.div(rows, self.ny, rounding_mode = 'floor').to(torch.int64)
-        ns = rows - ms * self.ny
-        js = torch.div(cols, self.ny, rounding_mode = 'floor').to(torch.int64)
-        ls = cols - js * self.ny
+        ms = torch.div(rows, self.nx, rounding_mode = 'floor').to(torch.int64)
+        ns = rows - ms * self.nx
+        js = torch.div(cols, self.nx, rounding_mode = 'floor').to(torch.int64)
+        ls = cols - js * self.nx
         diffi = ms - js
         diffj = ns - ls
-        return self.mat2D[self.nx + diffi - 1, self.ny + diffj - 1]
+        return self.mat2D[self.nx + diffj - 1, self.ny + diffi - 1]
