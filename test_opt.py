@@ -7,7 +7,6 @@ from rcwa.maxwell_mode import *
 from rcwa.scattering_matrix import *
 import matplotlib.pyplot as plt
 import time
-from torch.profiler import profile, record_function, ProfilerActivity
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 if device == "cuda":
@@ -15,10 +14,10 @@ if device == "cuda":
 else:
     print("Using CPU")
 
-nx = ny = 4 # half of the harmonics along x and y directions
+nx = ny = 8 # half of the harmonics along x and y directions
 # number of harmonics is (2 * nx + 1) x (2 * ny + 1)
-nx_grid = 4 # grid number along x direction, we use analytical Fourier transform, so nx_grid can be very small
-n_opt = 2 # number of optimization grid along one direction
+nx_grid = 20 # grid number along x direction, we use analytical Fourier transform, so nx_grid can be very small
+n_opt = 10 # number of optimization grid along one direction
 wavelength = 1.55
 Lx = 1. # period
 Ly = 1. # period
@@ -29,35 +28,44 @@ k0 = 2 * np.pi / wavelength # free space wavevector
 eps_in = torch.tensor(3.48*3.48+0j, device = device, requires_grad = False, dtype = torch.complex128)
 eps_out = torch.tensor(1.+0j, device = device, requires_grad = False, dtype = torch.complex128)
 
-de = torch.rand(2*n_opt//2, 2*n_opt//2, device = device, dtype = torch.float64)
+de = 0.5 * torch.ones(2*n_opt//2, 2*n_opt//2, device = device, dtype = torch.float64)
 de.requires_grad_(True)
 
-def compute_loss(de):
+coeff = MaxwellCoeff(nx, ny, Lx, Ly, device = device)
+port_mode = MaxwellMode()
+port_mode.compute_in_vacuum(wavelength, coeff, device = device)
+neff_port = port_mode.valsqrt.real / k0 / k0
+neff_port, port_indices = torch.sort(neff_port, descending = True)
+select_indices = port_indices[:n_mode]
+
+def get_permittivity(de):
     ex = eps_out * torch.ones(nx_grid, ny_grid, device = device, dtype = torch.float64)
     ex[nx_grid//2 - n_opt//2 : nx_grid//2 + n_opt//2, ny_grid//2 - n_opt//2 : ny_grid//2 + n_opt//2] += (eps_in - eps_out) * de
-    coeff = MaxwellCoeff(nx, ny, Lx, Ly, device = device)
-    port_mode = MaxwellMode()
-    port_mode.compute_in_vacuum(wavelength, coeff, device = device)
-    neff_port = port_mode.valsqrt.real / k0 / k0
-    neff_port, port_indices = torch.sort(neff_port, descending = True)
+    return ex
+
+def compute_loss(de):
+    ex = get_permittivity(de)
     coeff.compute(wavelength, ex, device = device)
     mode = MaxwellMode()
     mode.compute(coeff, device = device)
     smat = ScatteringMatrix()
     smat.compute(mode, 1.)
     smat.port_project(port_mode, coeff)
-    smatsqr = torch.abs(smat.smat)**2
-    smatsqr = smatsqr[port_indices[:n_mode], port_indices[:n_mode]]
-    return -torch.sum(torch.diag(smatsqr))
+    Tuu_2 = torch.abs(smat.Tuu())**2
+    ind_0 = select_indices[0]
+    ind_1 = select_indices[1]
+    print(Tuu_2[ind_0, ind_0].item(), Tuu_2[ind_1, ind_1].item())
+    # maximize the transmission of one polarization
+    # minimize the transmission of the other polarization
+    return -Tuu_2[ind_0, ind_0] + Tuu_2[ind_1, ind_1]
+
+plt.imshow(get_permittivity(de).detach().cpu().numpy().real)
+plt.savefig("de_init.png")
+plt.close()
 
 loss_history = []
-niters = 10
-optimizer = optim.Adam([de], lr=1e-3)
-# with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
-#              with_stack=True,
-#              profile_memory=True,
-#              record_shapes=True,
-#              with_modules = True) as prof:
+niters = 20
+optimizer = optim.Adam([de], lr=5e-2)
 t1 = time.perf_counter()
 for i in range(niters):
     optimizer.zero_grad()
@@ -66,11 +74,13 @@ for i in range(niters):
     loss.backward()
     optimizer.step()
     de.data = torch.clamp(de.data, 0., 1.)
-    # t5 = time.perf_counter()
-    print("i, de, loss = ", i, de.flatten().detach().cpu().numpy(), loss.item())
+    print("i, de, loss = ", i, loss.item())
 t2 = time.perf_counter()
 print("time = ", t2 - t1)
-# print(prof.key_averages(group_by_input_shape = True).table(sort_by = "self_cpu_time_total", row_limit=20))
+
+plt.imshow(get_permittivity(de).detach().cpu().numpy().real)
+plt.savefig("de_final.png")
+plt.close()
 
 plt.plot(loss_history)
 plt.savefig("loss_history.png")

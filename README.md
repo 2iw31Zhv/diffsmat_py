@@ -1,17 +1,34 @@
 # diffsmat_py
-PyTorch implementation of the algorithm in
+
+PyTorch demo of differentiable rigorous coupled wave analysis (RCWA) in
 
 Ziwei Zhu, and Changxi Zheng. [Differentiable Scattering Matrix for Optimization of Photonic Structures](https://opg.optica.org/oe/fulltext.cfm?uri=oe-28-25-37773). Optics Express 28.25 (2020).
 
+For a more complete implementation with fast fourier factorization, and so on, please check our official C++ version [link](https://github.com/Columbia-Computational-X-Lab/DiffSMat)
 
-C++ version [link](https://github.com/Columbia-Computational-X-Lab/DiffSMat)
+The library only depends on numpy and PyTorch, although drawing figures requires the installation of matplotlib. You can easily install these libraries via:
 
-## Feature Request
-This is a pre-release version of the RCWA part of our unified python library MaxPy. It is minimal in a sense there is no support for different sources and geometries. We are working to improve it. Feel free to submit a feature request through the following two ways:
+`pip install numpy torch matplotlib`
 
-1. open an issue on GitHub.
-2. email ziweizhu95@gmail.com for any feedbacks or requests.
 
-We would try to add new features in the MaxPy. 
+## Feature
 
-The library only depends on numpy and PyTorch, although drawing figures requires the installation of matplotlib.
+* stable and fast differentiable rcwa
+* no relaxation needed for repeated eigenvalues
+* topological optimization
+* support for more geometries (coming soon)
+* new algorithms for PIC design (coming soon)
+
+## Gallery
+
+### Optical mode analysis
+
+permittivity distribution            |  mode Ex, Ey, Hx, Hy
+:-------------------------:|:-------------------------:
+![](gallery/ex.png)  |  ![](gallery/all_modes.png)
+
+### Topological optimization
+
+designed permittivity          |  loss curve
+:-------------------------:|:-------------------------:
+![](gallery/de_final.png)  |  ![](gallery/loss_history.png)

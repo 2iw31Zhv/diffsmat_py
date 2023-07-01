@@ -52,25 +52,13 @@ class ScatteringMatrix:
         self.right_mode = port_mode
 
     def Tuu(self):
-        return self.smat[:self.half_dim, :self.half_dim]
+        return self.smat[:self.half_dim, :self.half_dim].clone()
     
     def Tdd(self):
-        return self.smat[self.half_dim:, self.half_dim:]
+        return self.smat[self.half_dim:, self.half_dim:].clone()
     
     def Rud(self):
-        return self.smat[:self.half_dim, self.half_dim:]
+        return self.smat[:self.half_dim, self.half_dim:].clone()
     
     def Rdu(self):
-        return self.smat[self.half_dim:, :self.half_dim]
-    
-    def setTuu(self, mat):
-        self.smat[:self.half_dim, :self.half_dim] = mat
-
-    def setTdd(self, mat):
-        self.smat[self.half_dim:, self.half_dim:] = mat
-
-    def setRud(self, mat):
-        self.smat[:self.half_dim, self.half_dim:] = mat
-
-    def setRdu(self, mat):
-        self.smat[self.half_dim:, :self.half_dim] = mat
+        return self.smat[self.half_dim:, :self.half_dim].clone()

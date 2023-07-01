@@ -61,6 +61,7 @@ class MaxwellCoeff:
         
         self.k0 = 2. * np.pi / wavelength
         k02 = self.k0 ** 2
+        
         self.fe2D = analytical_fourier_2d(ex, self.Lx, self.Ly, self.nx_harmonics, self.ny_harmonics, device = device)
         self.fe = BlockToeplitz2D(self.fe2D).to_dense() # (nx_harmonics * ny_harmonics) x (nx_harmonics * ny_harmonics)
         
