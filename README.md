@@ -18,6 +18,7 @@ The above simple installation may be not ideal on some platforms, so we suggest 
 
 * stable and fast differentiable rcwa
 * no relaxation needed for repeated eigenvalues
+* analytical Fourier transform (no convergence issue for low resolution grid)
 * topological optimization
 * support for more geometries (coming soon)
 * new algorithms for PIC design (coming soon)
