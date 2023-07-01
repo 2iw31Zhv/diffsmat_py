@@ -10,6 +10,9 @@ The library only depends on numpy and PyTorch, although drawing figures requires
 
 `pip install numpy torch matplotlib`
 
+The above simple installation may be not ideal on some platforms, so we suggest you to take a look at:
+
+[PyTorch Installation Guide](https://pytorch.org/get-started/locally/)
 
 ## Feature
 
