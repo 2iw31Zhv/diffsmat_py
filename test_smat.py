@@ -13,8 +13,8 @@ if device == "cuda":
 else:
     print("Using CPU")
 
-nx = 10 # half of the harmonics along x and y directions
-ny = 10
+nx = 20 # half of the harmonics along x and y directions
+ny = 20
 nx_grid = 100 # grid number along x direction, we use analytical Fourier transform, so nx_grid can be very small
 n_opt = 20 # number of optimization grid along one direction
 wavelength = 1.55
@@ -84,16 +84,16 @@ print(neff[:n_mode])
 plt.subplots(n_mode, 4, figsize = (10, 5))
 for i in range(n_mode):
     plt.subplot(n_mode, 4, i*4+1)
-    plt.imshow(torch.abs(mode.Ex(indices[i])).detach().cpu().numpy())
+    plt.imshow(mode.Ex(indices[i]).detach().cpu().numpy().real)
     plt.clim(-1, 1)
     plt.subplot(n_mode, 4, i*4+2)
-    plt.imshow(torch.abs(mode.Ey(indices[i])).detach().cpu().numpy())
+    plt.imshow(mode.Ey(indices[i]).detach().cpu().numpy().real)
     plt.clim(-1, 1)
     plt.subplot(n_mode, 4, i*4+3)
-    plt.imshow(torch.abs(mode.Hx(indices[i])).detach().cpu().numpy())
+    plt.imshow(mode.Hx(indices[i]).detach().cpu().numpy().real)
     plt.clim(-1, 1)
     plt.subplot(n_mode, 4, i*4+4)
-    plt.imshow(torch.abs(mode.Hy(indices[i])).detach().cpu().numpy())
+    plt.imshow(mode.Hy(indices[i]).detach().cpu().numpy().real)
     plt.clim(-1, 1)
 
 plt.savefig("all_modes.png")
