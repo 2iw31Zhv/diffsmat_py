@@ -13,8 +13,8 @@ if device == "cuda":
 else:
     print("Using CPU")
 
-nx = 20 # half of the harmonics along x and y directions
-ny = 20
+nx = 16 # half of the harmonics along x and y directions
+ny = 16
 nx_grid = 100 # grid number along x direction, we use analytical Fourier transform, so nx_grid can be very small
 n_opt = 20 # number of optimization grid along one direction
 wavelength = 1.55
