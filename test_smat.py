@@ -115,6 +115,3 @@ plt.clim(0, 1)
 plt.axis("off")
 plt.savefig("smat.png")
 plt.close()
-
-
-
