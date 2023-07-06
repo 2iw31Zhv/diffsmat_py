@@ -73,15 +73,27 @@ class MaxwellMode:
         self.__evaluate_H(coeff.Q, self.valsqrt, self.vecs)
 
     def Ex_fourier(self, k):
+        '''
+        return the Ex field in Fourier space
+        '''
         return self.vecs[:self.half_dim, k].reshape((self.ny, self.nx))
     
     def Ey_fourier(self, k):
+        '''
+        return the Ey field in Fourier space
+        '''
         return self.vecs[self.half_dim:None, k].reshape((self.ny, self.nx))
 
     def Hx_fourier(self, k):
+        '''
+        return the Hx field in Fourier space
+        '''
         return self.dual_vecs[self.half_dim:None, k].reshape((self.ny, self.nx))
        
     def Hy_fourier(self, k):
+        '''
+        return the Hy field in Fourier space
+        '''
         return self.dual_vecs[:self.half_dim, k].reshape((self.ny, self.nx))
     
     def field_in_real(self, field_in_fourier, nx_grid, ny_grid, Lx, Ly):
@@ -98,17 +110,60 @@ class MaxwellMode:
         return basis_ky @ field_in_fourier @ basis_kx
     
     def Ex(self, k, nx_grid = 100, ny_grid = 100, Lx = 1, Ly = 1):
+        '''
+        return the Ex field in real space
+
+        k: the index of the eigenmode
+        nx_grid: the number of grid points in x direction
+        ny_grid: the number of grid points in y direction
+        Lx: the length of the simulation box in x direction
+        Ly: the length of the simulation box in y direction
+        
+        assume the region is [0, Lx] x [0, Ly]
+        '''
         Ex_fourier = self.Ex_fourier(k)
         return self.field_in_real(Ex_fourier, nx_grid, ny_grid, Lx, Ly)
     
     def Ey(self, k, nx_grid = 100, ny_grid = 100, Lx = 1, Ly = 1):
+        '''
+        return the Ey field in real space
+        k: the index of the eigenmode
+        nx_grid: the number of grid points in x direction
+        ny_grid: the number of grid points in y direction
+        Lx: the length of the simulation box in x direction
+        Ly: the length of the simulation box in y direction
+        
+        assume the region is [0, Lx] x [0, Ly]
+        '''
         Ey_fourier = self.Ey_fourier(k)
         return self.field_in_real(Ey_fourier, nx_grid, ny_grid, Lx, Ly)
     
     def Hx(self, k, nx_grid = 100, ny_grid = 100, Lx = 1, Ly = 1):
+        '''
+        return the Hx field in real space
+
+        k: the index of the eigenmode
+        nx_grid: the number of grid points in x direction
+        ny_grid: the number of grid points in y direction
+        Lx: the length of the simulation box in x direction
+        Ly: the length of the simulation box in y direction
+        
+        assume the region is [0, Lx] x [0, Ly]
+        '''
         Hx_fourier = self.Hx_fourier(k)
         return self.field_in_real(Hx_fourier, nx_grid, ny_grid, Lx, Ly)
     
     def Hy(self, k, nx_grid = 100, ny_grid = 100, Lx = 1, Ly = 1):
+        '''
+        return the Hy field in real space
+
+        k: the index of the eigenmode
+        nx_grid: the number of grid points in x direction
+        ny_grid: the number of grid points in y direction
+        Lx: the length of the simulation box in x direction
+        Ly: the length of the simulation box in y direction
+        
+        assume the region is [0, Lx] x [0, Ly]
+        '''
         Hy_fourier = self.Hy_fourier(k)
         return self.field_in_real(Hy_fourier, nx_grid, ny_grid, Lx, Ly)

@@ -7,12 +7,26 @@ class ScatteringMatrix:
     
     @staticmethod
     def allocate(half_dim, device = "cpu"):
+        '''
+        half_dim: the half dimension of the scattering matrix
+        device: the device that the scattering matrix is allocated on
+
+        This method allocates a scattering matrix with the given half dimension
+        for a perfect transmission layer with thickness 0
+
+        smat = [Tuu, Rud;
+                Rdu, Tdd]
+        where Tuu = Tdd = identity, Rud = Rdu = 0
+        '''
         smat = ScatteringMatrix()
         smat.half_dim = half_dim
         smat.smat = torch.eye(2 * half_dim, device = device, dtype = torch.complex128)
         return smat
 
     def compute(self, mode, z):
+        '''
+        mode: the mode that the scattering matrix is computed for (the core)
+        '''
         self.W = mode.vecs
         self.invW = mode.left_vecs
         self.valsqrt = mode.valsqrt
@@ -25,10 +39,23 @@ class ScatteringMatrix:
 
     # construct the scattering matrix represented in the port modes
     def port_project(self, port_mode, coeff):
+        '''
+        port_mode: the mode that the scattering matrix is projected to (the two facesheets)
+        coeff: the coefficient matrix derived from the central part (the core)
+
+        You need to call compute(mode, z) method before calling this method
+        where mode is derived from coeff using matrix_mode
+        and z is the thickness of the core
+        '''
         invW_PQ_W = self.invW @ coeff.matrix_pq() @ self.W
+        # a hacky way to do differentiable matrix square root with the square root of diagonal alreay computed
         Omega = sqrtm_ops_core(invW_PQ_W, self.valsqrt.detach())
         invQV0 = torch.linalg.solve(coeff.Q, port_mode.dual_vecs)
         TV0 = (self.W @ Omega) @ (self.invW @ invQV0)
+
+        # differentiable matrix exponential is available after PyTorch 1.7.0
+        # we wrote differentiable Pade approximation manually before since it was not available,
+        # you can check our cpp code for that implementation
         K = self.W @ torch.linalg.matrix_exp(1j * self.z / self.k0 * Omega)
 
         M1 = port_mode.vecs + TV0
@@ -40,6 +67,9 @@ class ScatteringMatrix:
         N = torch.cat((N1, N2), dim = 0)
         
         # this saves more memory compared to solving a least square problem
+        # slightly different than our paper, but equivalent
+        # here we solve the linear system M @ X = N using QR decomposition
+        # as it is more general and even work if the matrix is not square
         mQ, mR = torch.linalg.qr(M) 
         mQ_mH_N = mQ.mH @ N 
         TR = torch.linalg.solve_triangular(mR, mQ_mH_N, upper = True) 
