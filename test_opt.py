@@ -50,6 +50,7 @@ def compute_loss(de):
     mode.compute(coeff, device = device)
     smat = ScatteringMatrix()
     smat.compute(mode, 1.)
+    # smat.port_project_v2(port_mode, coeff)
     smat.port_project(port_mode, coeff)
     Tuu_2 = torch.abs(smat.Tuu())**2
     ind_0 = select_indices[0]
@@ -78,10 +79,16 @@ for i in range(niters):
 t2 = time.perf_counter()
 print("time = ", t2 - t1)
 
+# np.save("loss_history_v2.npy", np.array(loss_history))
+loss_v2 = np.load("loss_history_v2.npy")
 plt.imshow(get_permittivity(de).detach().cpu().numpy().real)
 plt.savefig("de_final.png")
 plt.close()
 
-plt.plot(loss_history)
+plt.plot(loss_v2, label = "Lorentzian broadening")
+plt.plot(loss_history, label = "our method")
+plt.legend()
+plt.xlabel("iteration")
+plt.ylabel("loss")
 plt.savefig("loss_history.png")
 plt.close()

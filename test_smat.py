@@ -13,10 +13,11 @@ if device == "cuda":
 else:
     print("Using CPU")
 
-nx = 16 # half of the harmonics along x and y directions
-ny = 16
+nx = 30 # half of the harmonics along x and y directions
+ny = 10
 nx_grid = 100 # grid number along x direction, we use analytical Fourier transform, so nx_grid can be very small
-n_opt = 20 # number of optimization grid along one direction
+n_opt_y = 10 # number of optimization grid along one direction
+n_opt_x = 40
 wavelength = 1.55
 Lx = 1. # period
 Ly = 1. # period
@@ -30,10 +31,10 @@ eps_in = torch.tensor(3.48*3.48+0j, device = device, requires_grad = False, dtyp
 eps_out = torch.tensor(1.+0j, device = device, requires_grad = False, dtype = torch.complex128)
 
 # set the initial value of the optimized permittivity to be 0.5 * (eps_in + eps_out)
-de = 0.5 * torch.ones(2*n_opt//2, 2*n_opt//2, device = device, dtype = torch.float64)
+de = 0.5 * torch.ones(2*n_opt_y//2, 2*n_opt_x//2, device = device, dtype = torch.float64)
 de.requires_grad_(True)
-ex = eps_out * torch.ones(nx_grid, ny_grid, device = device, dtype = torch.float64)
-ex[nx_grid//2 - n_opt//2 : nx_grid//2 + n_opt//2, ny_grid//2 - n_opt//2 : ny_grid//2 + n_opt//2] += (eps_in - eps_out) * de
+ex = eps_out * torch.ones(ny_grid, nx_grid, device = device, dtype = torch.float64)
+ex[ny_grid//2 - n_opt_y//2 : ny_grid//2 + n_opt_y//2, nx_grid//2 - n_opt_x//2 : nx_grid//2 + n_opt_x//2] += (eps_in - eps_out) * de
 
 # the code calculate the modes in vacuum using analytical way
 # in vacuum, the modes are just plane waves
