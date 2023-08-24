@@ -62,7 +62,6 @@ def compute_loss(parameters):
 
 parameters = torch.tensor([0.2, 0.2], device = device, requires_grad = True, dtype = torch.float64)
 
-
 lev = LevelsetComponent(lambda x, y : eclipse(parameters, x, y), eps_in, eps_out, tolerance = tolerance)
 ex, _, _ = assign_permittivity_distribution(nx_grid, ny_grid, Lx, Ly, lev, device = device)
 plt.imshow(ex.detach().cpu().numpy().real)
@@ -93,5 +92,5 @@ plt.close()
 plt.plot(loss_history, label = "our method")
 plt.xlabel("iteration")
 plt.ylabel("loss")
-plt.savefig("loss_history.png")
+plt.savefig("loss_history_levelset.png")
 plt.close()
