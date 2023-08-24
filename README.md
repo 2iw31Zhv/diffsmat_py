@@ -36,4 +36,4 @@ permittivity distribution            |  mode Ex, Ey, Hx, Hy
 
 designed permittivity          |  loss curve
 :-------------------------:|:-------------------------:
-![](gallery/de_final.png)  |  ![](gallery/loss_history.png)
+![](gallery/de_binarized.png)  |  ![](gallery/loss_history.png)

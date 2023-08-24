@@ -85,10 +85,28 @@ plt.imshow(get_permittivity(de).detach().cpu().numpy().real)
 plt.savefig("de_final.png")
 plt.close()
 
-plt.plot(loss_v2, label = "Lorentzian broadening")
+# plt.plot(loss_v2, label = "Lorentzian broadening")
 plt.plot(loss_history, label = "our method")
-plt.legend()
+# plt.legend()
 plt.xlabel("iteration")
 plt.ylabel("loss")
 plt.savefig("loss_history.png")
 plt.close()
+
+plt.imshow(get_permittivity((de >= 0.4).float()).detach().cpu().numpy().real)
+plt.savefig("de_binarized.png")
+plt.close()
+
+if 0:
+    thresholds = torch.linspace(0., 1., 11, device = device)
+    binarized_loss = []
+    for threshold in thresholds:
+        de_bin = de.clone()
+        de_bin = (de_bin >= threshold).float()
+        loss = compute_loss(de_bin)
+        binarized_loss.append([loss.detach().cpu().numpy()])
+    binarized_loss = np.array(binarized_loss)
+
+    plt.plot(thresholds.detach().cpu().numpy(), binarized_loss[:, 0], '-', label='loss')
+    plt.savefig('binarized_loss.png')
+    plt.close()
