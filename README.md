@@ -21,6 +21,7 @@ The above simple installation may be not ideal on some platforms, so we suggest 
 * fast fourier factorization (fast convergence for small number of harmonics)
 * analytical Fourier transform (converge for low-resolution grid)
 * topological optimization
+* level set optimization
 * support for more geometries (coming soon)
 * new algorithms for PIC design (coming soon)
 
@@ -37,3 +38,9 @@ permittivity distribution            |  mode Ex, Ey, Hx, Hy
 designed permittivity          |  loss curve
 :-------------------------:|:-------------------------:
 ![](gallery/de_binarized.png)  |  ![](gallery/loss_history.png)
+
+### Level set optimization
+
+designed permittivity          |  loss curve
+:-------------------------:|:-------------------------:
+![](gallery/de_final_levelset.png)  |  ![](gallery/loss_history_levelset.png)
