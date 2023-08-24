@@ -2,3 +2,4 @@
 __pycache__/*
 rcwa/__pycache__/*
 !gallery/*
+geometry/__pycache__/*
