@@ -44,3 +44,9 @@ designed permittivity          |  loss curve
 designed permittivity          |  loss curve
 :-------------------------:|:-------------------------:
 ![](gallery/de_final_levelset.png)  |  ![](gallery/loss_history_levelset.png)
+
+### Boolean operator
+
+designed permittivity          |  loss curve
+:-------------------------:|:-------------------------:
+![](gallery/de_final_boolean.png)  |  ![](gallery/loss_history_boolean.png)
