@@ -62,12 +62,13 @@ class MaxwellMode:
         self.ndim = coeff.ndim
         self.nx = 2 * coeff.nx + 1
         self.ny = 2 * coeff.ny + 1
-
         pq = coeff.matrix_pq()
-        self.vals, self.vecs = torch.linalg.eig(pq)
         
-        self.vals = self.vals.detach()
-        self.vecs = self.vecs.detach()
+        # the gradients calculated using this method is problematic
+        # see https://pytorch.org/docs/stable/generated/torch.linalg.eig.html
+        with torch.no_grad():
+            self.vals, self.vecs = torch.linalg.eig(pq)
+        
         self.left_vecs = torch.linalg.pinv(self.vecs).detach()
         self.__eigval_sqrt(self.vals)
         self.__evaluate_H(coeff.Q, self.valsqrt, self.vecs)

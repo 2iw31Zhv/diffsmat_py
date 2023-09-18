@@ -4,3 +4,5 @@ maxpy/rcwa/__pycache__/*
 !gallery/*
 geometry/__pycache__/*
 maxpy/__pycache__/*
+maxpy/geometry/__pycache__/*
+maxpy/numeric/__pycache__/*
