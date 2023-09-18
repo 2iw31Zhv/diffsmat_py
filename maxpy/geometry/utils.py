@@ -1,5 +1,11 @@
 import torch
 
+def smooth_max(A, B, tolerance):
+    return 0.5 * (A + B + torch.sqrt((A - B)**2 + tolerance))
+
+def smooth_min(A, B, tolerance):
+    return 0.5 * (A + B - torch.sqrt((A - B)**2 + tolerance))
+
 def assign_permittivity_distribution(nx, ny, Lx, Ly, component, device):
     dx = Lx / nx
     dy = Ly / ny
