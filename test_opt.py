@@ -2,9 +2,7 @@ import numpy as np
 import torch
 import torch.optim as optim
 import matplotlib.pyplot as plt
-from rcwa.maxwell_coeff import *
-from rcwa.maxwell_mode import *
-from rcwa.scattering_matrix import *
+import maxpy.rcwa as rcwa
 import matplotlib.pyplot as plt
 import time
 
@@ -31,8 +29,8 @@ eps_out = torch.tensor(1.+0j, device = device, requires_grad = False, dtype = to
 de = 0.5 * torch.ones(2*n_opt//2, 2*n_opt//2, device = device, dtype = torch.float64)
 de.requires_grad_(True)
 
-coeff = MaxwellCoeff(nx, ny, Lx, Ly, device = device)
-port_mode = MaxwellMode()
+coeff = rcwa.MaxwellCoeff(nx, ny, Lx, Ly, device = device)
+port_mode = rcwa.MaxwellMode()
 port_mode.compute_in_vacuum(wavelength, coeff, device = device)
 neff_port = port_mode.valsqrt.real / k0 / k0
 neff_port, port_indices = torch.sort(neff_port, descending = True)
@@ -46,12 +44,12 @@ def get_permittivity(de):
 def compute_loss(de):
     ex = get_permittivity(de)
     coeff.compute(wavelength, ex, device = device)
-    mode = MaxwellMode()
+    mode = rcwa.MaxwellMode()
     mode.compute(coeff, device = device)
-    smat = ScatteringMatrix()
+    smat = rcwa.ScatteringMatrix()
     smat.compute(mode, 1.)
-    # smat.port_project_v2(port_mode, coeff)
-    smat.port_project(port_mode, coeff)
+    smat.port_project_v2(port_mode, coeff)
+    # smat.port_project(port_mode, coeff)
     Tuu_2 = torch.abs(smat.Tuu())**2
     ind_0 = select_indices[0]
     ind_1 = select_indices[1]

@@ -2,12 +2,10 @@ import numpy as np
 import torch
 import torch.optim as optim
 import matplotlib.pyplot as plt
-from rcwa.maxwell_coeff import *
-from rcwa.maxwell_mode import *
-from rcwa.scattering_matrix import *
+import maxpy.rcwa as rcwa
 import matplotlib.pyplot as plt
-from geometry.levelset_component import LevelsetComponent
-from geometry.utils import assign_permittivity_distribution
+from maxpy.geometry.levelset_component import LevelsetComponent
+from maxpy.geometry.utils import assign_permittivity_distribution
 
 import time
 
@@ -35,8 +33,8 @@ k0 = 2 * np.pi / wavelength # free space wavevector
 eps_in = torch.tensor(3.48*3.48+0j, device = device, requires_grad = False, dtype = torch.complex128)
 eps_out = torch.tensor(1.+0j, device = device, requires_grad = False, dtype = torch.complex128)
 
-coeff = MaxwellCoeff(nx, ny, Lx, Ly, device = device)
-port_mode = MaxwellMode()
+coeff = rcwa.MaxwellCoeff(nx, ny, Lx, Ly, device = device)
+port_mode = rcwa.MaxwellMode()
 port_mode.compute_in_vacuum(wavelength, coeff, device = device)
 neff_port = port_mode.valsqrt.real / k0 / k0
 neff_port, port_indices = torch.sort(neff_port, descending = True)
@@ -46,9 +44,9 @@ def compute_loss(parameters):
     lev = LevelsetComponent(lambda x, y : eclipse(parameters, x, y), eps_in, eps_out, tolerance = tolerance)
     ex, _, _ = assign_permittivity_distribution(nx_grid, ny_grid, Lx, Ly, lev, device = device)
     coeff.compute(wavelength, ex, device = device)
-    mode = MaxwellMode()
+    mode = rcwa.MaxwellMode()
     mode.compute(coeff, device = device)
-    smat = ScatteringMatrix()
+    smat = rcwa.ScatteringMatrix()
     smat.compute(mode, 1.)
     # smat.port_project_v2(port_mode, coeff)
     smat.port_project(port_mode, coeff)

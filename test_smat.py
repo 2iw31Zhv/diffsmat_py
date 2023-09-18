@@ -2,9 +2,7 @@ import numpy as np
 import torch
 import torch.optim as optim
 import matplotlib.pyplot as plt
-from rcwa.maxwell_coeff import *
-from rcwa.maxwell_mode import *
-from rcwa.scattering_matrix import *
+import maxpy.rcwa as rcwa
 import matplotlib.pyplot as plt
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -38,8 +36,8 @@ ex[ny_grid//2 - n_opt_y//2 : ny_grid//2 + n_opt_y//2, nx_grid//2 - n_opt_x//2 : 
 
 # the code calculate the modes in vacuum using analytical way
 # in vacuum, the modes are just plane waves
-coeff = MaxwellCoeff(nx, ny, Lx, Ly, device = device)
-port_mode = MaxwellMode()
+coeff = rcwa.MaxwellCoeff(nx, ny, Lx, Ly, device = device)
+port_mode = rcwa.MaxwellMode()
 port_mode.compute_in_vacuum(wavelength, coeff, device = device)
 
 # search for the modes with the highest effective index
@@ -74,7 +72,7 @@ plt.imshow(ex.detach().cpu().numpy().real)
 plt.savefig("ex.png")
 coeff.compute(wavelength, ex, device = device)
 
-mode = MaxwellMode()
+mode = rcwa.MaxwellMode()
 mode.compute(coeff, device = device)
 neff = mode.valsqrt.real / k0 / k0
 neff, indices = torch.sort(neff, descending = True)
@@ -100,7 +98,7 @@ for i in range(n_mode):
 plt.savefig("all_modes.png")
 plt.close()
 
-smat = ScatteringMatrix()
+smat = rcwa.ScatteringMatrix()
 smat.compute(mode, 1.)
 smat.port_project(port_mode, coeff)
 Tuu_2 = torch.abs(smat.Tuu())**2

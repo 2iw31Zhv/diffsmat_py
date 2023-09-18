@@ -1,5 +1,6 @@
 import torch
 from .diff_matfunc import sqrtm_ops_core, eig_diff
+from ..utils import *
 
 class ScatteringMatrix:
     def __init__(self):
@@ -37,13 +38,15 @@ class ScatteringMatrix:
         self.nmode = mode.valsqrt.shape[0]
         self.propogator = torch.exp(1j * z / self.k0 * mode.valsqrt)
 
-    # construct the scattering matrix using 
+    @deprecated
     def port_project_v2(self, port_mode, coeff, tolerance = 1e-6):
         '''
-        The version of relaxing the repeated eigenvalues
+        The version of relaxing the repeated eigenvalues through Lorenzian broadening
         '''
         PQ = coeff.matrix_pq()
+
         vals, W = eig_diff(PQ)
+
         valsqrt = torch.sqrt(vals)
         valsqrt = (valsqrt.imag > 0) * valsqrt - (valsqrt.imag <= 0) * valsqrt
         valsqrt = torch.logical_or(torch.abs(valsqrt.imag) >= torch.abs(valsqrt.real), 
@@ -51,6 +54,7 @@ class ScatteringMatrix:
                                         torch.abs(valsqrt.imag) < torch.abs(valsqrt.real),
                                         valsqrt.real < 0) * valsqrt
         valsqrt = (valsqrt.imag >= 0) * valsqrt + (valsqrt.imag < 0) * valsqrt.real
+
         Omega = W @ torch.diag(valsqrt) @ torch.linalg.inv(W)
         
         # invW_PQ_W = self.invW @ coeff.matrix_pq() @ self.W
@@ -59,9 +63,10 @@ class ScatteringMatrix:
         invQV0 = torch.linalg.solve(coeff.Q, port_mode.dual_vecs)
         # TV0 = (self.W @ Omega) @ (self.invW @ invQV0)
         TV0 = Omega @ invQV0
+
         # differentiable matrix exponential is available after PyTorch 1.7.0
         # we wrote differentiable Pade approximation manually before since it was not available,
-        # you can check our cpp code for that implementation
+        # you can check our C++ code for that implementation https://github.com/Columbia-Computational-X-Lab/DiffSMat
         K = torch.linalg.matrix_exp(1j * self.z / self.k0 * Omega)
 
         M1 = port_mode.vecs + TV0
@@ -81,6 +86,7 @@ class ScatteringMatrix:
         TR = torch.linalg.solve_triangular(mR, mQ_mH_N, upper = True) 
         k = N.shape[1]
         T, R = torch.split(TR, k)
+
         self.smat = torch.cat((TR, torch.cat((R, T), dim = 0)), dim = 1)
 
         self.half_dim = self.smat.shape[0] // 2

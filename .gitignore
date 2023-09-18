@@ -1,5 +1,6 @@
 *.png
 __pycache__/*
-rcwa/__pycache__/*
+maxpy/rcwa/__pycache__/*
 !gallery/*
 geometry/__pycache__/*
+maxpy/__pycache__/*

@@ -2,9 +2,7 @@ import numpy as np
 import torch
 import torch.optim as optim
 import matplotlib.pyplot as plt
-from rcwa.maxwell_coeff import *
-from rcwa.maxwell_mode import *
-from rcwa.scattering_matrix import *
+import maxpy.rcwa as rcwa
 import matplotlib.pyplot as plt
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -37,14 +35,14 @@ for nh in range(nh_min, nh_max):
     ex = eps_out * torch.ones(nx_grid, ny_grid, device = device, dtype = torch.float64)
     ex[nx_grid//2 - n_opt//2 : nx_grid//2 + n_opt//2, ny_grid//2 - n_opt//2 : ny_grid//2 + n_opt//2] += (eps_in - eps_out) * de
     
-    coeff_fff = MaxwellCoeff(nx, ny, Lx, Ly, device = device)
+    coeff_fff = rcwa.MaxwellCoeff(nx, ny, Lx, Ly, device = device)
     coeff_fff.compute(wavelength, ex, device = device)
-    mode = MaxwellMode()
+    mode = rcwa.MaxwellMode()
     mode.compute(coeff_fff, device = device)
     neff_fff = mode.valsqrt.real / k0 / k0
     neff_fff, indices = torch.sort(neff_fff, descending = True)
 
-    coeff = MaxwellCoeff(nx, ny, Lx, Ly, device = device)
+    coeff = rcwa.MaxwellCoeff(nx, ny, Lx, Ly, device = device)
     coeff.setfff(False) # turn off fast Fourier factorization
     coeff.compute(wavelength, ex, device = device)
     mode.compute(coeff, device = device)
