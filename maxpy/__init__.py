@@ -1,4 +1,4 @@
-"""MaxPy - Semi-Analytical Optimization Library """
+"""MaxPy - Semi-Analytical Photonic Optimization Library """
 
 __version__ = "0.0.1"
 __author__ = "Ziwei Zhu"
