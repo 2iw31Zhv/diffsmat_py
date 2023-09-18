@@ -1,5 +1,7 @@
 import numpy as np
 import torch 
+from ..utils import *
+from ..numeric.diff_matfunc import eig_diff
 
 class MaxwellMode:
     def __init__(self):
@@ -51,6 +53,29 @@ class MaxwellMode:
         matrix_q = torch.cat((torch.cat((Q00, Q01), dim = 1), torch.cat((Q10, Q11), dim = 1)), dim = 0)
         self.dual_vecs = matrix_q / self.valsqrt
 
+    @deprecated
+    def compute_diff(self, coeff, device = "cpu"):
+        '''
+        compute the eigenmodes in a distribution specified by coeff
+        with the gradients calculated by Lorenzian broadening
+
+        The method is used as a reference method.
+
+        coeff: MaxwellCoeff object, it need to call compute() method first
+        '''
+        self.k0 = coeff.k0
+        self.half_dim = coeff.half_dim
+        self.ndim = coeff.ndim
+        self.nx = 2 * coeff.nx + 1
+        self.ny = 2 * coeff.ny + 1
+        pq = coeff.matrix_pq()
+        
+        self.vals, self.vecs = eig_diff(pq)
+        self.left_vecs = torch.linalg.inv(self.vecs)
+        
+        self.__eigval_sqrt(self.vals)
+        self.__evaluate_H(coeff.Q, self.valsqrt, self.vecs)
+
     def compute(self, coeff, device = "cpu"):
         '''
         compute the eigenmodes in a distribution specified by coeff
@@ -68,8 +93,7 @@ class MaxwellMode:
         # see https://pytorch.org/docs/stable/generated/torch.linalg.eig.html
         with torch.no_grad():
             self.vals, self.vecs = torch.linalg.eig(pq)
-        
-        self.left_vecs = torch.linalg.pinv(self.vecs).detach()
+            self.left_vecs = torch.linalg.pinv(self.vecs)
         self.__eigval_sqrt(self.vals)
         self.__evaluate_H(coeff.Q, self.valsqrt, self.vecs)
 

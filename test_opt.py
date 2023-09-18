@@ -41,15 +41,22 @@ def get_permittivity(de):
     ex[nx_grid//2 - n_opt//2 : nx_grid//2 + n_opt//2, ny_grid//2 - n_opt//2 : ny_grid//2 + n_opt//2] += (eps_in - eps_out) * de
     return ex
 
+USE_DIFFERENTIABLE_EIG = False # False for our method
+
 def compute_loss(de):
     ex = get_permittivity(de)
     coeff.compute(wavelength, ex, device = device)
     mode = rcwa.MaxwellMode()
-    mode.compute(coeff, device = device)
-    smat = rcwa.ScatteringMatrix()
-    smat.compute(mode, 1.)
-    smat.port_project_v2(port_mode, coeff)
-    # smat.port_project(port_mode, coeff)
+    if USE_DIFFERENTIABLE_EIG:
+        mode.compute_diff(coeff, device = device)
+        smat = rcwa.ScatteringMatrix()
+        smat.compute(mode, 1.)
+        smat.port_project_diff(port_mode, coeff)
+    else:
+        mode.compute(coeff, device = device)
+        smat = rcwa.ScatteringMatrix()
+        smat.compute(mode, 1.)
+        smat.port_project(port_mode, coeff)
     Tuu_2 = torch.abs(smat.Tuu())**2
     ind_0 = select_indices[0]
     ind_1 = select_indices[1]

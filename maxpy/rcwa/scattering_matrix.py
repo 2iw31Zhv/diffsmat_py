@@ -39,29 +39,20 @@ class ScatteringMatrix:
         self.propogator = torch.exp(1j * z / self.k0 * mode.valsqrt)
 
     @deprecated
-    def port_project_v2(self, port_mode, coeff, tolerance = 1e-6):
+    def port_project_diff(self, port_mode, coeff, tolerance = 1e-6):
         '''
-        The version of relaxing the repeated eigenvalues through Lorenzian broadening
+        port_mode: the mode that the scattering matrix is projected to (the two facesheets)
+        coeff: the coefficient matrix derived from the central part (the core)
+
+        You need to call compute(mode, z) method before calling this method,
+        where mode is derived from coeff using MaxwellMode.
+
+        The mode needs to be solved by mode.compute_diff(self, coeff, device).
+
+        and z is the thickness of the core       
         '''
-        PQ = coeff.matrix_pq()
-
-        vals, W = eig_diff(PQ)
-
-        valsqrt = torch.sqrt(vals)
-        valsqrt = (valsqrt.imag > 0) * valsqrt - (valsqrt.imag <= 0) * valsqrt
-        valsqrt = torch.logical_or(torch.abs(valsqrt.imag) >= torch.abs(valsqrt.real), 
-                                        valsqrt.real >= 0) * valsqrt - torch.logical_and(
-                                        torch.abs(valsqrt.imag) < torch.abs(valsqrt.real),
-                                        valsqrt.real < 0) * valsqrt
-        valsqrt = (valsqrt.imag >= 0) * valsqrt + (valsqrt.imag < 0) * valsqrt.real
-
-        Omega = W @ torch.diag(valsqrt) @ torch.linalg.inv(W)
-        
-        # invW_PQ_W = self.invW @ coeff.matrix_pq() @ self.W
-        # a hacky way to do differentiable matrix square root with the square root of diagonal alreay computed
-        # Omega = sqrtm_ops_core(invW_PQ_W, self.valsqrt.detach())
+        Omega = self.W @ torch.diag(self.valsqrt) @ self.invW
         invQV0 = torch.linalg.solve(coeff.Q, port_mode.dual_vecs)
-        # TV0 = (self.W @ Omega) @ (self.invW @ invQV0)
         TV0 = Omega @ invQV0
 
         # differentiable matrix exponential is available after PyTorch 1.7.0
@@ -99,8 +90,11 @@ class ScatteringMatrix:
         port_mode: the mode that the scattering matrix is projected to (the two facesheets)
         coeff: the coefficient matrix derived from the central part (the core)
 
-        You need to call compute(mode, z) method before calling this method
-        where mode is derived from coeff using matrix_mode
+        You need to call compute(mode, z) method before calling this method,
+        where mode is derived from coeff using MaxwellMode.
+
+        The mode needs to be solved by mode.compute(coeff, device).
+        
         and z is the thickness of the core
         '''
         invW_PQ_W = self.invW @ coeff.matrix_pq() @ self.W
