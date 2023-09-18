@@ -22,7 +22,7 @@ The above simple installation may be not ideal on some platforms, so we suggest 
 * analytical Fourier transform (converge for low-resolution grid)
 * topological optimization
 * level set optimization
-* support for more geometries (coming soon)
+* support for many different geometries (rectangle, boolean operator)
 * new algorithms for PIC design (coming soon)
 
 ## Gallery
