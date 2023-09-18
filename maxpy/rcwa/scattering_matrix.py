@@ -1,5 +1,5 @@
 import torch
-from .diff_matfunc import sqrtm_ops_core, eig_diff
+from ..numeric.diff_matfunc import sqrtm_ops_core, eig_diff
 from ..utils import *
 
 class ScatteringMatrix:

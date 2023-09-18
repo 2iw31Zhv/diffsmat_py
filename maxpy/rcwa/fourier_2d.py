@@ -1,6 +1,7 @@
+import unittest
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
-
 from .toeplitz import Toeplitz
 from .blocktoeplitz_2d import BlockToeplitz2D
 
@@ -64,8 +65,7 @@ def analytical_fourier_2d(e, Lx, Ly, M, N, type = "continuous"):
         fe2D =  dx * dy * basis_kx_conj @ e.T @ basis_ky_conj / (Lx * Ly)
         return BlockToeplitz2D(fe2D).to_dense()
 
-import unittest
-import matplotlib.pyplot as plt
+
 class TestFourier2D(unittest.TestCase):
     def test_continuous(self):
         e = torch.ones((3, 3), dtype = torch.complex128, device = "cpu")
