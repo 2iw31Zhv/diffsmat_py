@@ -6,3 +6,11 @@ geometry/__pycache__/*
 maxpy/__pycache__/*
 maxpy/geometry/__pycache__/*
 maxpy/numeric/__pycache__/*
+*.pyc
+*.so
+*.o
+*.egg
+PKG-INFO
+maxpy/ext/*
+*.gds
+*.svg
